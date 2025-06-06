@@ -1,0 +1,166 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 45 93% 47%; /* Jaune/Orange principal */
+  --primary-foreground: 25 39% 20%;
+  --secondary: 35 44% 85%; /* Beige clair */
+  --secondary-foreground: 25 39% 20%;
+  --accent: 40 96% 65%; /* Jaune accent */
+  --accent-foreground: 25 39% 20%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 20 14.3% 4.1%;
+  --radius: 0.5rem;
+  
+  /* Custom IT Management colors */
+  --primary-50: 235 100% 97%; /* #EBF8FF */
+  --primary-100: 218 91% 85%; /* #BEE3F8 */
+  --primary-500: 210 98% 56%; /* #3182CE */
+  --primary-600: 212 84% 44%; /* #2C5282 */
+  --primary-700: 215 79% 34%; /* #2A4365 */
+  
+  --success-50: 140 100% 97%; /* #F0FFF4 */
+  --success-100: 143 85% 88%; /* #C6F6D5 */
+  --success-500: 142 71% 45%; /* #38A169 */
+  --success-600: 142 76% 36%; /* #2F855A */
+  
+  --warning-50: 35 100% 97%; /* #FFFAF0 */
+  --warning-100: 35 88% 89%; /* #FEEBC8 */
+  --warning-500: 20 85% 57%; /* #ED8936 */
+  --warning-600: 20 90% 48%; /* #C05621 */
+  
+  --error-50: 0 100% 91%; /* #FED7D7 */
+  --error-500: 0 84% 60%; /* #E53E3E */
+  --error-600: 0 75% 52%; /* #C53030 */
+  
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 240 5.9% 10%;
+  --sidebar-primary: 210 98% 56%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 240 4.8% 95.9%;
+  --sidebar-accent-foreground: 240 5.9% 10%;
+  --sidebar-border: 220 13% 91%;
+  --sidebar-ring: 217.2 32.6% 17.5%;
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 210 98% 56%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+  --radius: 0.5rem;
+  
+  --sidebar-background: 240 5.9% 10%;
+  --sidebar-foreground: 240 4.8% 95.9%;
+  --sidebar-primary: 224.3 76.3% 94.1%;
+  --sidebar-primary-foreground: 220.9 39.3% 11%;
+  --sidebar-accent: 240 3.7% 15.9%;
+  --sidebar-accent-foreground: 240 4.8% 95.9%;
+  --sidebar-border: 240 3.7% 15.9%;
+  --sidebar-ring: 217.2 32.6% 17.5%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer utilities {
+  .text-primary-50 { color: hsl(var(--primary-50)); }
+  .text-primary-100 { color: hsl(var(--primary-100)); }
+  .text-primary-500 { color: hsl(var(--primary-500)); }
+  .text-primary-600 { color: hsl(var(--primary-600)); }
+  .text-primary-700 { color: hsl(var(--primary-700)); }
+  
+  .bg-primary-50 { background-color: hsl(var(--primary-50)); }
+  .bg-primary-100 { background-color: hsl(var(--primary-100)); }
+  .bg-primary-500 { background-color: hsl(var(--primary-500)); }
+  .bg-primary-600 { background-color: hsl(var(--primary-600)); }
+  .bg-primary-700 { background-color: hsl(var(--primary-700)); }
+  
+  .text-success-50 { color: hsl(var(--success-50)); }
+  .text-success-100 { color: hsl(var(--success-100)); }
+  .text-success-500 { color: hsl(var(--success-500)); }
+  .text-success-600 { color: hsl(var(--success-600)); }
+  
+  .bg-success-50 { background-color: hsl(var(--success-50)); }
+  .bg-success-100 { background-color: hsl(var(--success-100)); }
+  .bg-success-500 { background-color: hsl(var(--success-500)); }
+  .bg-success-600 { background-color: hsl(var(--success-600)); }
+  
+  .text-warning-50 { color: hsl(var(--warning-50)); }
+  .text-warning-100 { color: hsl(var(--warning-100)); }
+  .text-warning-500 { color: hsl(var(--warning-500)); }
+  .text-warning-600 { color: hsl(var(--warning-600)); }
+  
+  .bg-warning-50 { background-color: hsl(var(--warning-50)); }
+  .bg-warning-100 { background-color: hsl(var(--warning-100)); }
+  .bg-warning-500 { background-color: hsl(var(--warning-500)); }
+  .bg-warning-600 { background-color: hsl(var(--warning-600)); }
+  
+  .text-error-50 { color: hsl(var(--error-50)); }
+  .text-error-500 { color: hsl(var(--error-500)); }
+  .text-error-600 { color: hsl(var(--error-600)); }
+  
+  .bg-error-50 { background-color: hsl(var(--error-50)); }
+  .bg-error-100 { background-color: hsl(var(--error-100)); }
+  .bg-error-500 { background-color: hsl(var(--error-500)); }
+  .bg-error-600 { background-color: hsl(var(--error-600)); }
+  
+  .border-primary-200 { border-color: hsl(210 100% 92%); }
+  .border-success-200 { border-color: hsl(143 85% 92%); }
+  .border-warning-200 { border-color: hsl(35 88% 92%); }
+  .border-error-200 { border-color: hsl(0 100% 89%); }
+  
+  .text-primary-900 { color: hsl(215 79% 16%); }
+  .text-success-900 { color: hsl(142 91% 20%); }
+  .text-warning-900 { color: hsl(20 90% 28%); }
+  .text-error-900 { color: hsl(0 75% 42%); }
+  
+  .text-primary-700 { color: hsl(215 79% 34%); }
+  .text-success-700 { color: hsl(142 76% 36%); }
+  .text-warning-700 { color: hsl(20 90% 48%); }
+  .text-error-700 { color: hsl(0 75% 52%); }
+  
+  .hover\:text-primary-800:hover { color: hsl(215 79% 26%); }
+  .hover\:text-success-800:hover { color: hsl(142 91% 28%); }
+  .hover\:text-warning-800:hover { color: hsl(20 90% 38%); }
+  .hover\:text-error-800:hover { color: hsl(0 75% 42%); }
+  
+  .hover\:bg-primary-100:hover { background-color: hsl(var(--primary-100)); }
+  .hover\:bg-success-100:hover { background-color: hsl(var(--success-100)); }
+  .hover\:bg-warning-100:hover { background-color: hsl(var(--warning-100)); }
+}
