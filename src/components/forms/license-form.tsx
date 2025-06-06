@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { License } from "@shared/schema";
+import { License } from '@shared/schema';
 import { LICENSE_TYPES } from "@/lib/constants";
 
 // Type pour les données brutes du formulaire (avant transformation)

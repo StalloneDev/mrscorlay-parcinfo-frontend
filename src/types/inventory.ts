@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { insertInventorySchema } from "@shared/schema";
+import { insertInventorySchema } from '@shared/schema';
 
 export type InventoryFormData = {
   equipmentId: string;

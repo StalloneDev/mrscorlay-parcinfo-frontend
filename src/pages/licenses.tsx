@@ -23,7 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import LicenseForm from "@/components/forms/license-form";
-import { License } from "@shared/schema";
+import { License } from '@shared/schema';
 import { Plus, Search, Edit, Trash2, Key, AlertTriangle, CheckCircle, Clock } from "lucide-react";
 
 export default function LicensesPage() {

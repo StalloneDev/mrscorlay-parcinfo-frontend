@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Ticket, User } from "@shared/schema";
+import { Ticket, User } from '@shared/schema';
 import { TICKET_STATUS, TICKET_PRIORITY } from "@/lib/constants";
 
 const ticketSchema = z.object({

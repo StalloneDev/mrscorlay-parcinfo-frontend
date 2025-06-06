@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Employee } from "@shared/schema";
+import type { Employee } from '@shared/schema';
 
 const employeeSchema = z.object({
   name: z.string().min(1, "Le nom est requis"),

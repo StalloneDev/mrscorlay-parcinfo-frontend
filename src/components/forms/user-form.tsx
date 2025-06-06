@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { User } from "@shared/schema";
+import { User } from '@shared/schema';
 import { USER_ROLES } from "@/lib/constants";
 
 const userSchema = z.object({

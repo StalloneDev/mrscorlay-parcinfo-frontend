@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { User, Mail, Shield, Calendar } from "lucide-react";
+import { User as UserIcon, Mail, Shield, Calendar } from "lucide-react";
+import type { User } from "@shared/schema";
 
 export default function Profile() {
   const { user } = useAuth();
@@ -156,7 +157,7 @@ export default function Profile() {
               Créé le {formatDate(user.createdAt)}
             </div>
             <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-              <User className="w-4 h-4 mr-2" />
+              <UserIcon className="w-4 h-4 mr-2" />
               ID: {user.id.split('-')[0]}...
             </div>
           </CardContent>

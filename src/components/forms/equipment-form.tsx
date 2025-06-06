@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Equipment, Employee } from "@shared/schema";
+import { Equipment, Employee } from '@shared/schema';
 import { EQUIPMENT_TYPES, EQUIPMENT_STATUS } from "@/lib/constants";
 
 const equipmentFormSchema = z.object({

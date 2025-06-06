@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Inventory, Equipment, Employee } from "@shared/schema";
+import { Inventory, Equipment, Employee } from '@shared/schema';
 import { INVENTORY_CONDITION } from "@/lib/constants";
 import { InventoryFormData } from "@/types/inventory";
 

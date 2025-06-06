@@ -23,7 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import EquipmentForm from "@/components/forms/equipment-form";
-import { Equipment, Employee, EquipmentHistory } from "@shared/schema";
+import { Equipment, Employee, EquipmentHistory } from '@shared/schema';
 import { EQUIPMENT_STATUS } from "@/lib/constants";
 import { Plus, Search, Edit, Trash2, History } from "lucide-react";
 

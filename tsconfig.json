@@ -18,7 +18,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@shared/*": ["../backend-parc-info/src/shared/*"]
+      "@shared/*": ["src/shared/*"]
     }
   },
   "include": ["src"],

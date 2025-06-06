@@ -23,7 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import InventoryForm from "@/components/forms/inventory-form";
-import { Inventory, Equipment, Employee } from "@shared/schema";
+import { Inventory, Equipment, Employee } from '@shared/schema';
 import { INVENTORY_CONDITION } from "@/lib/constants";
 import { Plus, Search, Edit, Trash2, MapPin, CheckCircle, AlertTriangle } from "lucide-react";
 

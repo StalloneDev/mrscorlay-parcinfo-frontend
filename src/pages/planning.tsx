@@ -26,7 +26,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Plus } from "lucide-react";
-import type { MaintenanceSchedule } from "@shared/schema";
+import type { MaintenanceSchedule } from '@shared/schema';
 
 // Fonction pour récupérer les maintenances
 async function fetchMaintenances(): Promise<MaintenanceSchedule[]> {
@@ -333,9 +333,9 @@ export default function Planning() {
                       </div>
                       <span
                         className={`px-2 py-1 text-xs rounded-full ${
-                          maintenance.status === "planifie"
+                          maintenance.status === "planifié"
                             ? "bg-blue-100 text-blue-800"
-                            : maintenance.status === "en_cours"
+                            : maintenance.status === "en cours"
                             ? "bg-yellow-100 text-yellow-800"
                             : "bg-green-100 text-green-800"
                         }`}

@@ -23,7 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import TicketForm from "@/components/forms/ticket-form";
-import { Ticket, User } from "@shared/schema";
+import { Ticket, User } from '@shared/schema';
 import { TICKET_STATUS, TICKET_PRIORITY } from "@/lib/constants";
 import { Plus, Search, Edit, Trash2, AlertTriangle, CheckCircle, Clock, Eye } from "lucide-react";
 import { useRole } from "@/hooks/useRole";

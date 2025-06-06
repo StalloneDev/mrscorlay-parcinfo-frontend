@@ -1,13 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-
-interface User {
-  id: string;
-  email: string;
-  firstName: string | null;
-  lastName: string | null;
-  role: string;
-}
+import type { User } from '@shared/schema';
 
 interface RegisterData {
   email: string;

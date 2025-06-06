@@ -23,7 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import EmployeeForm from "@/components/forms/employee-form";
-import { Employee, Equipment } from "@shared/schema";
+import { Employee, Equipment } from '@shared/schema';
 import { useRole } from "@/hooks/useRole";
 import { Plus, Search, Edit, Trash2, User } from "lucide-react";
 

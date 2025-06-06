@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { Alert } from "@shared/schema";
+import type { Alert } from '@shared/schema';
 
 interface NotificationState {
   unreadCount: number;

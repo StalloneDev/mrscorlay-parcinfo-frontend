@@ -6,10 +6,13 @@ export type User = {
   email: string;
   firstName: string | null;
   lastName: string | null;
+  name?: string;
+  phone?: string;
+  team?: string;
   role: "admin" | "technicien" | "utilisateur";
   isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type Employee = {
@@ -18,8 +21,8 @@ export type Employee = {
   email: string;
   department: string;
   position: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type Equipment = {
@@ -27,11 +30,24 @@ export type Equipment = {
   type: "ordinateur" | "serveur" | "périphérique";
   model: string;
   serialNumber: string;
-  purchaseDate: Date;
+  purchaseDate: string;
   status: "en service" | "en maintenance" | "hors service";
   assignedTo: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type EquipmentHistory = {
+  id: string;
+  equipmentId: string;
+  action: "assignation" | "maintenance" | "retrait";
+  description: string;
+  performedBy: string;
+  date: string;
+  updatedBy: string;
+  changes: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type Ticket = {
@@ -42,8 +58,8 @@ export type Ticket = {
   assignedTo: string | null;
   status: "ouvert" | "assigné" | "en cours" | "résolu" | "clôturé";
   priority: "basse" | "moyenne" | "haute";
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type Inventory = {
@@ -51,10 +67,10 @@ export type Inventory = {
   equipmentId: string;
   assignedTo: string | null;
   location: string;
-  lastChecked: Date;
+  lastChecked: string;
   condition: "fonctionnel" | "défectueux";
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type License = {
@@ -66,8 +82,36 @@ export type License = {
   maxUsers: number | null;
   currentUsers: number;
   cost: number | null;
-  createdAt: Date;
-  updatedAt: Date;
+  expiryDate: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Alert = {
+  id: string;
+  title: string;
+  message: string;
+  description: string;
+  type: "info" | "warning" | "error" | "success";
+  status: "nouvelle" | "lue";
+  createdAt: string;
+  read: boolean;
+  userId: string;
+};
+
+export type MaintenanceSchedule = {
+  id: string;
+  equipmentId: string;
+  title: string;
+  scheduledDate: string;
+  startDate: string;
+  endDate: string;
+  type: "preventive" | "corrective";
+  description: string;
+  assignedTo: string | null;
+  status: "planifié" | "en cours" | "terminé" | "annulé";
+  createdAt: string;
+  updatedAt: string;
 };
 
 // Schémas Zod
@@ -91,7 +135,7 @@ export const insertEquipmentSchema = z.object({
   type: z.enum(["ordinateur", "serveur", "périphérique"]),
   model: z.string(),
   serialNumber: z.string(),
-  purchaseDate: z.date(),
+  purchaseDate: z.string(),
   status: z.enum(["en service", "en maintenance", "hors service"]),
   assignedTo: z.string().nullable(),
 });
@@ -100,7 +144,7 @@ export const insertInventorySchema = z.object({
   equipmentId: z.string(),
   assignedTo: z.string().nullable(),
   location: z.string(),
-  lastChecked: z.date(),
+  lastChecked: z.string(),
   condition: z.enum(["fonctionnel", "défectueux"]),
 });
 
@@ -112,4 +156,5 @@ export const insertLicenseSchema = z.object({
   maxUsers: z.number().nullable(),
   currentUsers: z.number(),
   cost: z.number().nullable(),
+  expiryDate: z.string().nullable(),
 }); 
