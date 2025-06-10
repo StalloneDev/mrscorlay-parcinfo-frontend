@@ -1,6 +1,6 @@
 // URL de l'API en fonction de l'environnement
 export const API_URL = process.env.NODE_ENV === 'production'
-  ? 'https://mrscorlay-parc-info-backend.vercel.app'
+  ? 'https://mrscorlay-parcinfo.vercel.app'
   : '';
 
 // Fonction utilitaire pour construire les URLs de l'API
