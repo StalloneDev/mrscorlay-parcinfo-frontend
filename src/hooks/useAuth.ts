@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import type { User } from '@shared/schema';
+import { getApiUrl } from '../lib/config';
 
 interface RegisterData {
   email: string;
@@ -25,7 +26,9 @@ export function useAuth() {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('/api/auth/user');
+      const response = await fetch(getApiUrl('/api/auth/user'), {
+        credentials: 'include'
+      });
       if (response.ok) {
         const userData = await response.json();
         setUser(userData);
@@ -38,11 +41,12 @@ export function useAuth() {
   };
 
   const register = async (data: RegisterData) => {
-    const response = await fetch('/api/auth/register', {
+    const response = await fetch(getApiUrl('/api/auth/register'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify(data),
     });
 
@@ -57,11 +61,12 @@ export function useAuth() {
   };
 
   const login = async (data: LoginData) => {
-    const response = await fetch('/api/auth/login', {
+    const response = await fetch(getApiUrl('/api/auth/login'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify(data),
     });
 
@@ -76,7 +81,10 @@ export function useAuth() {
   };
 
   const logout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
+    await fetch(getApiUrl('/api/auth/logout'), { 
+      method: 'POST',
+      credentials: 'include'
+    });
     setUser(null);
     setLocation('/login');
   };
