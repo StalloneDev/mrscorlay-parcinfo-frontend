@@ -4,4 +4,10 @@ export const API_URL = process.env.NODE_ENV === 'production'
   : 'http://localhost:3000';
 
 // Fonction utilitaire pour construire les URLs de l'API
-export const getApiUrl = (path: string) => `${API_URL}${path.startsWith('/') ? path : `/${path}`}`; 
+export const getApiUrl = (path: string) => `${API_URL}${path.startsWith('/') ? path : `/${path}`}`;
+
+// Configuration des en-têtes par défaut
+export const defaultHeaders = {
+  'Content-Type': 'application/json',
+  'Accept': 'application/json',
+}; 
