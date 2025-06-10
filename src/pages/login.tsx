@@ -18,16 +18,10 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-        headers: { "Content-Type": "application/json" },
+      const response = await apiRequest("POST", "/api/auth/login", {
+        email,
+        password
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
 
       toast({
         title: "Connexion réussie",
