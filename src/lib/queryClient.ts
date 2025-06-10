@@ -14,11 +14,25 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
   const url = getApiUrl(path);
+  console.log('Making API request:', { method, url, data });
+  
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+  };
+
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers,
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
+    mode: "cors",
+  });
+
+  console.log('API response:', { 
+    status: res.status, 
+    statusText: res.statusText,
+    headers: Object.fromEntries(res.headers.entries())
   });
 
   await throwIfResNotOk(res);
@@ -32,8 +46,20 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const url = getApiUrl(queryKey[0] as string);
+    console.log('Making query request:', { url });
+    
     const res = await fetch(url, {
       credentials: "include",
+      mode: "cors",
+      headers: {
+        "Accept": "application/json"
+      }
+    });
+
+    console.log('Query response:', { 
+      status: res.status, 
+      statusText: res.statusText,
+      headers: Object.fromEntries(res.headers.entries())
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
