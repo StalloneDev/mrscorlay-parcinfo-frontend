@@ -26,67 +26,112 @@ export function useAuth() {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch(getApiUrl('/api/auth/user'), {
-        credentials: 'include'
+      console.log('Checking auth...');
+      const response = await fetch('/api/auth/user', {
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        }
       });
+
+      console.log('Auth check response:', response.status);
       if (response.ok) {
         const userData = await response.json();
+        console.log('Auth check successful:', userData);
         setUser(userData);
+      } else {
+        console.log('Auth check failed:', response.status);
+        setUser(null);
+        setLocation('/login');
       }
     } catch (error) {
       console.error('Auth check failed:', error);
+      setUser(null);
+      setLocation('/login');
     } finally {
       setIsLoading(false);
     }
   };
 
   const register = async (data: RegisterData) => {
-    const response = await fetch(getApiUrl('/api/auth/register'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(data),
-    });
+    try {
+      console.log('Attempting registration...');
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Registration failed');
+      console.log('Registration response:', response.status);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Registration failed');
+      }
+
+      const userData = await response.json();
+      console.log('Registration successful:', userData);
+      setUser(userData.user);
+      setLocation('/');
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
     }
-
-    const userData = await response.json();
-    setUser(userData.user);
-    setLocation('/');
   };
 
   const login = async (data: LoginData) => {
-    const response = await fetch(getApiUrl('/api/auth/login'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(data),
-    });
+    try {
+      console.log('Attempting login...');
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Login failed');
+      console.log('Login response:', response.status);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Login failed');
+      }
+
+      const userData = await response.json();
+      console.log('Login successful:', userData);
+      setUser(userData.user);
+      await checkAuth(); // Vérifier l'authentification après la connexion
+      setLocation('/');
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
     }
-
-    const userData = await response.json();
-    setUser(userData.user);
-    setLocation('/');
   };
 
   const logout = async () => {
-    await fetch(getApiUrl('/api/auth/logout'), { 
-      method: 'POST',
-      credentials: 'include'
-    });
-    setUser(null);
-    setLocation('/login');
+    try {
+      console.log('Attempting logout...');
+      const response = await fetch('/api/auth/logout', { 
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        }
+      });
+
+      console.log('Logout response:', response.status);
+      setUser(null);
+      setLocation('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      throw error;
+    }
   };
 
   return {
