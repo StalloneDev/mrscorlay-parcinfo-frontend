@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import type { User } from '@shared/schema';
-import { getApiUrl } from '../lib/config';
+import { apiRequest } from '@/lib/queryClient';
 
 interface RegisterData {
   email: string;
@@ -27,24 +27,10 @@ export function useAuth() {
   const checkAuth = async () => {
     try {
       console.log('Checking auth...');
-      const response = await fetch('/api/auth/user', {
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        }
-      });
-
-      console.log('Auth check response:', response.status);
-      if (response.ok) {
-        const userData = await response.json();
-        console.log('Auth check successful:', userData);
-        setUser(userData);
-      } else {
-        console.log('Auth check failed:', response.status);
-        setUser(null);
-        setLocation('/login');
-      }
+      const response = await apiRequest('GET', '/api/auth/user');
+      const userData = await response.json();
+      console.log('Auth check successful:', userData);
+      setUser(userData);
     } catch (error) {
       console.error('Auth check failed:', error);
       setUser(null);
@@ -57,22 +43,7 @@ export function useAuth() {
   const register = async (data: RegisterData) => {
     try {
       console.log('Attempting registration...');
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(data),
-      });
-
-      console.log('Registration response:', response.status);
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Registration failed');
-      }
-
+      const response = await apiRequest('POST', '/api/auth/register', data);
       const userData = await response.json();
       console.log('Registration successful:', userData);
       setUser(userData.user);
@@ -86,22 +57,7 @@ export function useAuth() {
   const login = async (data: LoginData) => {
     try {
       console.log('Attempting login...');
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(data),
-      });
-
-      console.log('Login response:', response.status);
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login failed');
-      }
-
+      const response = await apiRequest('POST', '/api/auth/login', data);
       const userData = await response.json();
       console.log('Login successful:', userData);
       setUser(userData.user);
@@ -116,16 +72,8 @@ export function useAuth() {
   const logout = async () => {
     try {
       console.log('Attempting logout...');
-      const response = await fetch('/api/auth/logout', { 
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        }
-      });
-
-      console.log('Logout response:', response.status);
+      await apiRequest('POST', '/api/auth/logout');
+      console.log('Logout successful');
       setUser(null);
       setLocation('/login');
     } catch (error) {
