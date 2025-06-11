@@ -31,12 +31,14 @@ export function useAuth() {
       const userData = await response.json();
       console.log('Auth check successful:', userData);
       setUser(userData);
+      return true;
     } catch (error) {
       console.error('Auth check failed:', error);
       setUser(null);
       if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
         setLocation('/login');
       }
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -63,8 +65,12 @@ export function useAuth() {
       const userData = await response.json();
       console.log('Login successful:', userData);
       setUser(userData.user);
-      await checkAuth(); // Vérifier l'authentification après la connexion
-      setLocation('/');
+      
+      // Vérifier l'authentification et rediriger
+      const isAuthenticated = await checkAuth();
+      if (isAuthenticated) {
+        setLocation('/');
+      }
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
