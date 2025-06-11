@@ -27,24 +27,18 @@ const pageNames: Record<string, { title: string; description: string }> = {
 export default function Header() {
   const [location] = useLocation();
   const { theme, setTheme } = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { toast } = useToast();
   const { notifications, unreadCount } = useNotifications();
   const currentPage = pageNames[location] || { title: "Page", description: "" };
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
+      await logout();
+      toast({
+        title: "Déconnexion réussie",
+        description: "Vous avez été déconnecté avec succès.",
       });
-
-      if (response.ok) {
-        toast({
-          title: "Déconnexion réussie",
-          description: "Vous avez été déconnecté avec succès.",
-        });
-        window.location.href = "/";
-      }
     } catch (error) {
       toast({
         title: "Erreur",
