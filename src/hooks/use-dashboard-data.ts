@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { getApiUrl } from "@/lib/config";
 
 interface Activity {
   id: string;
@@ -53,7 +54,13 @@ interface DashboardStats {
 }
 
 async function fetchDashboardStats(): Promise<DashboardStats> {
-  const response = await fetch("/api/dashboard/stats");
+  const response = await fetch(getApiUrl("/api/dashboard/stats"), {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+  });
   if (!response.ok) {
     throw new Error("Failed to fetch dashboard stats");
   }
