@@ -27,13 +27,15 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Plus } from "lucide-react";
 import type { MaintenanceSchedule } from '@shared/schema';
+import { getApiUrl } from "@/lib/config";
 
 // Fonction pour récupérer les maintenances
 async function fetchMaintenances(): Promise<MaintenanceSchedule[]> {
-  const response = await fetch("/api/maintenance", {
+  const response = await fetch(getApiUrl("/api/maintenance"), {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      "Accept": "application/json",
     },
   });
   if (!response.ok) {
@@ -48,18 +50,18 @@ async function fetchMaintenances(): Promise<MaintenanceSchedule[]> {
 // Fonction pour créer une nouvelle maintenance
 async function createMaintenance(data: any): Promise<MaintenanceSchedule> {
   console.log("Données envoyées au serveur:", data);
-  const response = await fetch("/api/maintenance", {
+  const response = await fetch(getApiUrl("/api/maintenance"), {
     method: "POST",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      "Accept": "application/json",
     },
     body: JSON.stringify(data),
   });
   
-  const responseData = await response.json();
-  
   if (!response.ok) {
+    const responseData = await response.json();
     console.error("Erreur serveur:", responseData);
     if (responseData.errors && Array.isArray(responseData.errors)) {
       const errorMessages = responseData.errors
@@ -68,10 +70,10 @@ async function createMaintenance(data: any): Promise<MaintenanceSchedule> {
         .join("\n");
       throw new Error(errorMessages || "Erreur lors de la création de la maintenance");
     }
-    throw new Error(responseData.error || "Erreur lors de la création de la maintenance");
+    throw new Error(responseData.message || "Erreur lors de la création de la maintenance");
   }
   
-  return responseData;
+  return response.json();
 }
 
 export default function Planning() {
