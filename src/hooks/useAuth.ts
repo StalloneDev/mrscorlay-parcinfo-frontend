@@ -51,7 +51,7 @@ export function useAuth() {
       const userData = await response.json();
       console.log('Registration successful:', userData);
       setUser(userData.user);
-      setLocation('/');
+      setLocation('/dashboard');
     } catch (error) {
       console.error('Registration failed:', error);
       throw error;
@@ -69,7 +69,7 @@ export function useAuth() {
       // Vérifier l'authentification et rediriger
       const isAuthenticated = await checkAuth();
       if (isAuthenticated) {
-        setLocation('/');
+        setLocation('/dashboard');
       }
     } catch (error) {
       console.error('Login failed:', error);
