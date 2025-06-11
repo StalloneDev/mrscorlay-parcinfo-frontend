@@ -34,7 +34,9 @@ export function useAuth() {
     } catch (error) {
       console.error('Auth check failed:', error);
       setUser(null);
-      setLocation('/login');
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+        setLocation('/login');
+      }
     } finally {
       setIsLoading(false);
     }
