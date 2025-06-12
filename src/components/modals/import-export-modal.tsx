@@ -51,10 +51,22 @@ export function ImportExportModal({ isOpen, onClose, mode }: ImportExportModalPr
     }
 
     try {
-      const response = await apiRequest('GET', `/api/settings/export/${selectedType}`);
-      const blob = new Blob([JSON.stringify(response, null, 2)], { type: 'application/json' });
+      const response = await fetch(getApiUrl(`/api/settings/export/${selectedType}`), {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Accept": "application/vnd.ms-excel",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Export failed");
+      }
+
+      // Récupérer le blob directement
+      const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = `${selectedType}-export-${new Date().toISOString()}.xls`;
       document.body.appendChild(a);
@@ -68,6 +80,7 @@ export function ImportExportModal({ isOpen, onClose, mode }: ImportExportModalPr
       });
       onClose();
     } catch (error) {
+      console.error("Erreur d'export:", error);
       toast({
         title: "Erreur",
         description: "Impossible d'exporter les données",
