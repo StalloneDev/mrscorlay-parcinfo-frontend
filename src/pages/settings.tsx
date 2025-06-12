@@ -7,6 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useTheme } from "next-themes";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest } from "@/lib/queryClient";
 import { 
   Settings as SettingsIcon, 
   Moon, 
@@ -16,12 +18,33 @@ import {
   Database,
   Download,
   Upload,
-  Trash2
+  Trash2,
+  Lock,
+  LogOut
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ImportExportModal } from "@/components/modals/import-export-modal";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [isImportExportModalOpen, setIsImportExportModalOpen] = useState(false);
+  const [importExportMode, setImportExportMode] = useState<"import" | "export">("export");
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
   
   const [notifications, setNotifications] = useState({
     email: true,
@@ -38,32 +61,134 @@ export default function SettingsPage() {
     autoRefresh: 30,
   });
 
-  const handleSaveNotifications = () => {
-    toast({
-      title: "Paramètres sauvegardés",
-      description: "Vos préférences de notifications ont été mises à jour",
-    });
+  const handleSaveNotifications = async () => {
+    try {
+      await apiRequest('PUT', '/api/settings/notifications', notifications);
+      toast({
+        title: "Paramètres sauvegardés",
+        description: "Vos préférences de notifications ont été mises à jour",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder les préférences de notifications",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleSavePreferences = () => {
-    toast({
-      title: "Paramètres sauvegardés",
-      description: "Vos préférences générales ont été mises à jour",
-    });
+  const handleSavePreferences = async () => {
+    try {
+      await apiRequest('PUT', '/api/settings/preferences', preferences);
+      toast({
+        title: "Paramètres sauvegardés",
+        description: "Vos préférences générales ont été mises à jour",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder les préférences",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleExportData = () => {
-    toast({
-      title: "Export en cours",
-      description: "Vos données sont en cours d'exportation...",
-    });
+    setImportExportMode("export");
+    setIsImportExportModalOpen(true);
   };
 
   const handleImportData = () => {
-    toast({
-      title: "Import en cours",
-      description: "Vos données sont en cours d'importation...",
-    });
+    setImportExportMode("import");
+    setIsImportExportModalOpen(true);
+  };
+
+  const handleCloseOtherSessions = async () => {
+    try {
+      await apiRequest('POST', '/api/auth/logout-other-sessions');
+      toast({
+        title: "Sessions fermées",
+        description: "Toutes les autres sessions ont été fermées",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de fermer les autres sessions",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast({
+        title: "Erreur",
+        description: "Les mots de passe ne correspondent pas",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await apiRequest('PUT', '/api/auth/change-password', {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+      
+      setIsChangePasswordOpen(false);
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      
+      toast({
+        title: "Mot de passe modifié",
+        description: "Votre mot de passe a été modifié avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de modifier le mot de passe",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleClearCache = async () => {
+    try {
+      await apiRequest('POST', '/api/settings/clear-cache');
+      toast({
+        title: "Cache vidé",
+        description: "Le cache de l'application a été vidé avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de vider le cache",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleResetData = async () => {
+    if (!confirm("Êtes-vous sûr de vouloir réinitialiser toutes les données ? Cette action est irréversible.")) {
+      return;
+    }
+
+    try {
+      await apiRequest('POST', '/api/settings/reset-data');
+      toast({
+        title: "Données réinitialisées",
+        description: "Toutes les données ont été réinitialisées",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de réinitialiser les données",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -292,13 +417,59 @@ export default function SettingsPage() {
             <div className="space-y-3">
               <h4 className="font-medium">Gestion de session</h4>
               
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" onClick={handleCloseOtherSessions} className="w-full">
+                <LogOut className="h-4 w-4 mr-2" />
                 Fermer toutes les autres sessions
               </Button>
               
-              <Button variant="outline" className="w-full">
-                Changer le mot de passe
-              </Button>
+              <Dialog open={isChangePasswordOpen} onOpenChange={setIsChangePasswordOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full">
+                    <Lock className="h-4 w-4 mr-2" />
+                    Changer le mot de passe
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Changer le mot de passe</DialogTitle>
+                    <DialogDescription>
+                      Entrez votre mot de passe actuel et votre nouveau mot de passe
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="current-password">Mot de passe actuel</Label>
+                      <Input
+                        id="current-password"
+                        type="password"
+                        value={passwordData.currentPassword}
+                        onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password">Nouveau mot de passe</Label>
+                      <Input
+                        id="new-password"
+                        type="password"
+                        value={passwordData.newPassword}
+                        onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button onClick={handleChangePassword}>Changer le mot de passe</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
 
             <Separator />
@@ -306,11 +477,13 @@ export default function SettingsPage() {
             <div className="space-y-3">
               <h4 className="font-medium">Audit et logs</h4>
               
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" onClick={handleExportData} className="w-full">
+                <Download className="h-4 w-4 mr-2" />
                 Télécharger les logs d'audit
               </Button>
               
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" onClick={handleClearCache} className="w-full">
+                <Trash2 className="h-4 w-4 mr-2" />
                 Vider le cache de l'application
               </Button>
             </div>
@@ -320,7 +493,7 @@ export default function SettingsPage() {
             <div className="space-y-3">
               <h4 className="font-medium text-destructive">Zone de danger</h4>
               
-              <Button variant="destructive" className="w-full">
+              <Button variant="destructive" onClick={handleResetData} className="w-full">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Réinitialiser toutes les données
               </Button>
@@ -355,6 +528,12 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      <ImportExportModal
+        isOpen={isImportExportModalOpen}
+        onClose={() => setIsImportExportModalOpen(false)}
+        mode={importExportMode}
+      />
     </div>
   );
 }
