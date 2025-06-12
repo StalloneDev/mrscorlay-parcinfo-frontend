@@ -19,6 +19,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Download, Upload } from "lucide-react";
 import { getApiUrl } from "@/lib/config";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface ImportExportModalProps {
   isOpen: boolean;
@@ -134,26 +136,72 @@ export function ImportExportModal({ isOpen, onClose, mode }: ImportExportModalPr
     }
   };
 
+  const handleGenerateTemplate = async () => {
+    if (!selectedType) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner un type de données",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/settings/template/${selectedType}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la génération du modèle");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${selectedType}-template.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "Modèle généré avec succès",
+      });
+    } catch (error) {
+      console.error("Erreur lors de la génération du modèle:", error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la génération du modèle",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>
-            {mode === "import" ? "Importer des données" : "Exporter des données"}
-          </DialogTitle>
+          <DialogTitle>Importer/Exporter des données</DialogTitle>
           <DialogDescription>
-            {mode === "import"
-              ? "Sélectionnez le type de données à importer et choisissez votre fichier"
-              : "Sélectionnez le type de données à exporter"}
+            Sélectionnez le type de données à importer ou exporter
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Type de données</label>
-            <Select value={selectedType} onValueChange={setSelectedType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un type" />
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="type" className="text-right">
+              Type
+            </Label>
+            <Select
+              value={selectedType}
+              onValueChange={setSelectedType}
+            >
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Sélectionner un type" />
               </SelectTrigger>
               <SelectContent>
                 {DATA_TYPES.map((type) => (
@@ -165,39 +213,43 @@ export function ImportExportModal({ isOpen, onClose, mode }: ImportExportModalPr
             </Select>
           </div>
 
-          {mode === "import" && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Fichier</label>
-              <div className="relative">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => document.getElementById('import-file')?.click()}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Choisir un fichier
-                </Button>
-                <input
-                  id="import-file"
-                  type="file"
-                  accept=".xls"
-                  className="hidden"
-                  onChange={handleImport}
-                />
-              </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="file" className="text-right">
+              Fichier
+            </Label>
+            <div className="col-span-3">
+              <Input
+                id="file"
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleImport}
+                className="w-full"
+              />
             </div>
-          )}
+          </div>
         </div>
 
-        <DialogFooter>
-          {mode === "export" && (
-            <Button onClick={handleExport}>
-              <Download className="h-4 w-4 mr-2" />
-              Exporter
-            </Button>
-          )}
-          <Button variant="outline" onClick={onClose}>
-            Annuler
+        <DialogFooter className="flex flex-col sm:flex-row gap-2">
+          <Button
+            variant="outline"
+            onClick={handleGenerateTemplate}
+            className="w-full sm:w-auto"
+          >
+            Générer un modèle
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            className="w-full sm:w-auto"
+          >
+            Exporter
+          </Button>
+          <Button
+            onClick={() => handleImport(null as unknown as React.ChangeEvent<HTMLInputElement>)}
+            disabled={!selectedType}
+            className="w-full sm:w-auto"
+          >
+            Importer
           </Button>
         </DialogFooter>
       </DialogContent>
