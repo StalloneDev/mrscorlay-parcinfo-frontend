@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,9 +25,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Plus } from "lucide-react";
+import { Plus, Edit, Trash, Eye } from "lucide-react";
 import type { MaintenanceSchedule } from '@shared/schema';
 import { getApiUrl } from "@/lib/config";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { Pagination } from "@/components/ui/pagination";
 
 // Fonction pour récupérer les maintenances
 async function fetchMaintenances(): Promise<MaintenanceSchedule[]> {
@@ -76,11 +78,19 @@ async function createMaintenance(data: any): Promise<MaintenanceSchedule> {
   return response.json();
 }
 
+const PAGE_SIZE = 10;
+
 export default function Planning() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isNewEventDialogOpen, setIsNewEventDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [plannings, setPlannings] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedPlanning, setSelectedPlanning] = useState<any | null>(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   // Récupérer les maintenances
   const { data: maintenances = [], isLoading } = useQuery<MaintenanceSchedule[]>({
@@ -107,6 +117,43 @@ export default function Planning() {
       });
     },
   });
+
+  useEffect(() => {
+    // Charger tous les plannings au montage
+    fetch(getApiUrl("/api/maintenance"), {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => setPlannings(data))
+      .catch((err) => console.error(err));
+  }, []);
+
+  // Pagination
+  const paginatedPlannings = plannings.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const totalPages = Math.ceil(plannings.length / PAGE_SIZE);
+
+  // Actions
+  const handleView = (planning: any) => {
+    setSelectedPlanning(planning);
+    setViewModalOpen(true);
+  };
+  const handleEdit = (planning: any) => {
+    setSelectedPlanning(planning);
+    setEditModalOpen(true);
+  };
+  const handleDelete = (planning: any) => {
+    setSelectedPlanning(planning);
+    setDeleteModalOpen(true);
+  };
+  const confirmDelete = async () => {
+    if (!selectedPlanning) return;
+    await fetch(getApiUrl(`/api/maintenance/${selectedPlanning.id}`), {
+      method: "DELETE",
+      credentials: "include",
+    });
+    setPlannings(plannings => plannings.filter(p => p.id !== selectedPlanning.id));
+    setDeleteModalOpen(false);
+  };
 
   const handleNewEvent = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -361,6 +408,210 @@ export default function Planning() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Tableau des plannings */}
+      <div className="mt-12">
+        <h2 className="text-lg font-bold mb-4">Liste des plannings</h2>
+        <Table className="border rounded shadow bg-background">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Titre</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Date début</TableHead>
+              <TableHead>Date fin</TableHead>
+              <TableHead>Statut</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedPlannings.map((planning) => (
+              <TableRow key={planning.id}>
+                <TableCell>{planning.title}</TableCell>
+                <TableCell>{planning.type}</TableCell>
+                <TableCell>{planning.startDate ? format(new Date(planning.startDate), "dd/MM/yyyy") : ""}</TableCell>
+                <TableCell>{planning.endDate ? format(new Date(planning.endDate), "dd/MM/yyyy") : ""}</TableCell>
+                <TableCell>{planning.status}</TableCell>
+                <TableCell>
+                  <Button size="icon" variant="ghost" onClick={() => handleView(planning)} title="Voir"><Eye className="w-4 h-4" /></Button>
+                  <Button size="icon" variant="ghost" onClick={() => handleEdit(planning)} title="Éditer"><Edit className="w-4 h-4" /></Button>
+                  <Button size="icon" variant="ghost" onClick={() => handleDelete(planning)} title="Supprimer"><Trash className="w-4 h-4" /></Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        {/* Pagination simple */}
+        {totalPages > 1 && (
+          <div className="flex justify-end mt-4 gap-2">
+            <Button
+              variant="outline"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            >
+              Précédent
+            </Button>
+            <span className="px-2 py-1 rounded bg-muted">{currentPage} / {totalPages}</span>
+            <Button
+              variant="outline"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            >
+              Suivant
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Modal Voir Détails */}
+      <Dialog open={viewModalOpen} onOpenChange={setViewModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Détails du planning</DialogTitle>
+            <DialogDescription>
+              {selectedPlanning && (
+                <div className="space-y-2">
+                  <div><b>Titre :</b> {selectedPlanning.title}</div>
+                  <div><b>Type :</b> {selectedPlanning.type}</div>
+                  <div><b>Date début :</b> {selectedPlanning.startDate ? format(new Date(selectedPlanning.startDate), "dd/MM/yyyy") : ""}</div>
+                  <div><b>Date fin :</b> {selectedPlanning.endDate ? format(new Date(selectedPlanning.endDate), "dd/MM/yyyy") : ""}</div>
+                  <div><b>Statut :</b> {selectedPlanning.status}</div>
+                  <div><b>Notes :</b> {selectedPlanning.notes}</div>
+                  <div><b>Description :</b> {selectedPlanning.description}</div>
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Éditer */}
+      <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Éditer le planning</DialogTitle>
+            <DialogDescription>
+              {selectedPlanning && (
+                <form
+                  onSubmit={async e => {
+                    e.preventDefault();
+                    console.log(selectedPlanning);
+                    const data = {
+                      title: selectedPlanning.title,
+                      type: selectedPlanning.type,
+                      startDate: selectedPlanning.startDate,
+                      endDate: selectedPlanning.endDate,
+                      status: selectedPlanning.status,
+                      notes: selectedPlanning.notes,
+                      description: selectedPlanning.description,
+                    }
+                    console.log(data);
+                    await fetch(getApiUrl(`/api/maintenance/${selectedPlanning.id}`), { ...data, credentials: "include" });
+                    fetch(getApiUrl("/api/maintenance"), { credentials: "include" })
+                      .then((res) => res.json())
+                      .then((data) => setPlannings(data));
+                    setEditModalOpen(false);
+                  }}
+                  className="space-y-2"
+                >
+                  <div>
+                    <label className="block font-medium">Titre</label>
+                    <input
+                      className="input input-bordered w-full"
+                      value={selectedPlanning.title}
+                      onChange={e => setSelectedPlanning({ ...selectedPlanning, title: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-medium">Type</label>
+                    <Select
+                      value={selectedPlanning.type}
+                      onValueChange={value => setSelectedPlanning({ ...selectedPlanning, type: value })}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Sélectionnez un type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="preventive">Préventive</SelectItem>
+                        <SelectItem value="corrective">Corrective</SelectItem>
+                        <SelectItem value="mise_a_jour">Mise à jour</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block font-medium">Date début</label>
+                    <Input
+                      type="date"
+                      className="input input-bordered w-full"
+                      value={selectedPlanning.startDate ? format(new Date(selectedPlanning.startDate), "yyyy-MM-dd") : ""}
+                      onChange={e => setSelectedPlanning({ ...selectedPlanning, startDate: new Date(e.target.value).toISOString() })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-medium">Date fin</label> 
+                    <Input
+                      type="date"
+                      className="input input-bordered w-full"
+                      value={selectedPlanning.endDate ? format(new Date(selectedPlanning.endDate), "yyyy-MM-dd") : ""}
+                      onChange={e => setSelectedPlanning({ ...selectedPlanning, endDate: new Date(e.target.value).toISOString() })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-medium">Statut</label>
+                    <Select
+                      value={selectedPlanning.status}
+                      onValueChange={value => setSelectedPlanning({ ...selectedPlanning, status: value })}
+                    >
+                      <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Sélectionnez un statut" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="planifie">Planifié</SelectItem>
+                        <SelectItem value="en_cours">En cours</SelectItem>
+                        <SelectItem value="termine">Terminé</SelectItem>
+                        <SelectItem value="annule">Annulé</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block font-medium">Notes</label>
+                    <Textarea
+                      className="input input-bordered w-full" 
+                      value={selectedPlanning.notes}
+                      onChange={e => setSelectedPlanning({ ...selectedPlanning, notes: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-medium">Description</label>
+                    <Textarea
+                      className="input input-bordered w-full" 
+                      value={selectedPlanning.description}
+                      onChange={e => setSelectedPlanning({ ...selectedPlanning, description: e.target.value })}
+                    />
+                  </div>
+                  
+                  <button type="submit" className="btn btn-primary">Enregistrer</button>
+                </form>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Supprimer */}
+      <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Supprimer le planning</DialogTitle>
+            <DialogDescription>
+              Es-tu sûr de vouloir supprimer ce planning ?
+              <div className="flex gap-2 mt-4">
+                <button className="btn btn-danger" onClick={confirmDelete}>Oui, supprimer</button>
+                <button className="btn" onClick={() => setDeleteModalOpen(false)}>Annuler</button>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 
