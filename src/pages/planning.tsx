@@ -420,6 +420,8 @@ export default function Planning() {
               <TableHead>Date début</TableHead>
               <TableHead>Date fin</TableHead>
               <TableHead>Statut</TableHead>
+              <TableHead>Notes</TableHead>
+              <TableHead>Description</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -430,7 +432,25 @@ export default function Planning() {
                 <TableCell>{planning.type}</TableCell>
                 <TableCell>{planning.startDate ? format(new Date(planning.startDate), "dd/MM/yyyy") : ""}</TableCell>
                 <TableCell>{planning.endDate ? format(new Date(planning.endDate), "dd/MM/yyyy") : ""}</TableCell>
-                <TableCell>{planning.status}</TableCell>
+                <TableCell>
+                    <span
+                        className={`px-2 py-1 text-xs rounded-full ${
+                          planning.status === "planifie"
+                            ? "bg-blue-100 text-blue-800"
+                            : planning.status === "en_cours"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : planning.status === "termine"
+                            ? "bg-green-100 text-green-800"
+                            : planning.status === "annule"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                    >
+                      {planning.status}
+                    </span>
+                </TableCell>
+                <TableCell>{planning.notes ? planning.notes : ""}</TableCell>
+                <TableCell>{planning.description ? planning.description : ""}</TableCell>
                 <TableCell>
                   <Button size="icon" variant="ghost" onClick={() => handleView(planning)} title="Voir"><Eye className="w-4 h-4" /></Button>
                   <Button size="icon" variant="ghost" onClick={() => handleEdit(planning)} title="Éditer"><Edit className="w-4 h-4" /></Button>
