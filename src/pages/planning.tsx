@@ -524,17 +524,35 @@ export default function Planning() {
                       notes: selectedPlanning.notes,
                       description: selectedPlanning.description,
                     }
-                    console.log(data);
-                    await fetch(getApiUrl(`/api/maintenance/${selectedPlanning.id}`), { ...data, credentials: "include" });
-                    fetch(getApiUrl("/api/maintenance"), { credentials: "include" })
-                      .then((res) => res.json())
-                      .then((data) => setPlannings(data));
-                    setEditModalOpen(false);
+                    const res = await fetch(getApiUrl(`/api/maintenance/${selectedPlanning.id}`), {
+                      method: "PUT",
+                      credentials: "include",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify(data),
+                    });
+                    if (res.ok) {
+                      fetch(getApiUrl("/api/maintenance"), { credentials: "include" })
+                        .then((res) => res.json())
+                        .then((data) => setPlannings(data));
+                      setEditModalOpen(false);
+                      toast({
+                        title: "Succès",
+                        description: "Modification effectuée avec succès",
+                      });
+                    } else {
+                      toast({
+                        title: "Erreur",
+                        description: "Erreur lors de la modification",
+                        variant: "destructive",
+                      });
+                    }
                   }}
                   className="space-y-2"
                 >
                   <div>
-                    <label className="block font-medium">Titre</label>
+                    <label className="block font-medium w-full">Titre</label>
                     <input
                       className="input input-bordered w-full"
                       value={selectedPlanning.title}
@@ -542,7 +560,7 @@ export default function Planning() {
                     />
                   </div>
                   <div>
-                    <label className="block font-medium">Type</label>
+                    <label className="block font-medium w-full">Type</label>
                     <Select
                       value={selectedPlanning.type}
                       onValueChange={value => setSelectedPlanning({ ...selectedPlanning, type: value })}
@@ -558,7 +576,7 @@ export default function Planning() {
                     </Select>
                   </div>
                   <div>
-                    <label className="block font-medium">Date début</label>
+                    <label className="block font-medium w-full">Date début</label>
                     <Input
                       type="date"
                       className="input input-bordered w-full"
@@ -567,7 +585,7 @@ export default function Planning() {
                     />
                   </div>
                   <div>
-                    <label className="block font-medium">Date fin</label> 
+                    <label className="block font-medium w-full">Date fin</label>   
                     <Input
                       type="date"
                       className="input input-bordered w-full"
@@ -593,7 +611,7 @@ export default function Planning() {
                     </Select>
                   </div>
                   <div>
-                    <label className="block font-medium">Notes</label>
+                    <label className="block font-medium w-full">Notes</label>
                     <Textarea
                       className="input input-bordered w-full" 
                       value={selectedPlanning.notes}
@@ -601,7 +619,7 @@ export default function Planning() {
                     />
                   </div>
                   <div>
-                    <label className="block font-medium">Description</label>
+                    <label className="block font-medium w-full">Description</label>  
                     <Textarea
                       className="input input-bordered w-full" 
                       value={selectedPlanning.description}
@@ -609,7 +627,9 @@ export default function Planning() {
                     />
                   </div>
                   
-                  <button type="submit" className="btn btn-primary">Enregistrer</button>
+                  <Button type="submit" className="w-full bg-primary text-white hover:bg-primary/90">
+                    Enregistrer
+                  </Button>  
                 </form>
               )}
             </DialogDescription>
@@ -625,8 +645,8 @@ export default function Planning() {
             <DialogDescription>
               Es-tu sûr de vouloir supprimer ce planning ?
               <div className="flex gap-2 mt-4">
-                <button className="btn btn-danger" onClick={confirmDelete}>Oui, supprimer</button>
-                <button className="btn" onClick={() => setDeleteModalOpen(false)}>Annuler</button>
+                <Button variant="destructive" onClick={confirmDelete}>Oui, supprimer</Button>
+                <Button variant="outline" onClick={() => setDeleteModalOpen(false)}>Annuler</Button>
               </div>
             </DialogDescription>
           </DialogHeader>
