@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -17,6 +17,7 @@ export default function Register() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { register: registerUser } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -49,29 +50,17 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          firstName: formData.firstName,
-          lastName: formData.lastName
-        }),
-        headers: { "Content-Type": "application/json" },
+      await registerUser({
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-
       toast({
         title: "Compte créé avec succès",
         description: "Vous êtes maintenant connecté.",
       });
-
-      // Redirect to dashboard
-      window.location.href = "/";
+      // Redirection gérée par le hook useAuth
     } catch (error: any) {
       toast({
         title: "Erreur de création de compte",
