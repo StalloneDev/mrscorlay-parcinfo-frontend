@@ -26,12 +26,23 @@ import EquipmentForm from "@/components/forms/equipment-form";
 import { Equipment, Employee, EquipmentHistory } from '@shared/schema';
 import { EQUIPMENT_STATUS } from "@/lib/constants";
 import { Plus, Search, Edit, Trash2, History } from "lucide-react";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 
 export default function EquipmentPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingEquipment, setEditingEquipment] = useState<Equipment | null>(null);
   const [viewingHistory, setViewingHistory] = useState<Equipment | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedType, setSelectedType] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -47,6 +58,8 @@ export default function EquipmentPage() {
     queryKey: [`/api/equipment/${viewingHistory?.id}/history`],
     enabled: !!viewingHistory,
   });
+
+  const types = [...new Set(equipment?.map(item => item.type).filter(Boolean) || [])];
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -68,11 +81,25 @@ export default function EquipmentPage() {
     },
   });
 
-  const filteredEquipment = equipment?.filter((item) =>
-    item.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.type.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredEquipment = equipment?.filter((item) => {
+    const searchMatch =
+      item.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.type.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const statusMatch = selectedStatus ? item.status === selectedStatus : true;
+    const typeMatch = selectedType ? item.type === selectedType : true;
+
+    const dateMatch = (() => {
+      if (!startDate && !endDate) return true;
+      const itemDate = new Date(item.purchaseDate).toISOString().split('T')[0];
+      if (startDate && itemDate < startDate) return false;
+      if (endDate && itemDate > endDate) return false;
+      return true;
+    })();
+
+    return searchMatch && statusMatch && typeMatch && dateMatch;
+  }) || [];
 
   const getStatusBadge = (status: string) => {
     const statusConfig = EQUIPMENT_STATUS.find(s => s.value === status);
@@ -110,15 +137,53 @@ export default function EquipmentPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 flex-wrap gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher des équipements..."
+              placeholder="Rechercher..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-64"
+              className="pl-10 w-48"
             />
+          </div>
+          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Statut" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Tous les statuts</SelectItem>
+              {EQUIPMENT_STATUS.map(status => (
+                <SelectItem key={status.value} value={status.value}>{status.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={selectedType} onValueChange={setSelectedType}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Tous les types</SelectItem>
+              {types.map(type => (
+                <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="flex items-center space-x-2">
+             <Input 
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-auto"
+              />
+              <span className="text-muted-foreground">-</span>
+              <Input 
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-auto"
+                min={startDate}
+              />
           </div>
         </div>
         

@@ -34,6 +34,9 @@ export default function TicketsPage() {
   const [viewingTicket, setViewingTicket] = useState<Ticket | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [priorityFilter, setPriorityFilter] = useState<string>("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { canPerformAction } = useRole();
@@ -93,7 +96,17 @@ export default function TicketsPage() {
     
     const matchesStatus = statusFilter === "all" || ticket.status === statusFilter;
     
-    return matchesSearch && matchesStatus;
+    const matchesPriority = priorityFilter === "all" || ticket.priority === priorityFilter;
+
+    const dateMatch = (() => {
+      if (!startDate && !endDate) return true;
+      const itemDate = new Date(ticket.createdAt!).toISOString().split('T')[0];
+      if (startDate && itemDate < startDate) return false;
+      if (endDate && itemDate > endDate) return false;
+      return true;
+    })();
+
+    return matchesSearch && matchesStatus && matchesPriority && dateMatch;
   }) || [];
 
   const getStatusBadge = (status: string) => {
@@ -164,14 +177,14 @@ export default function TicketsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 flex-wrap gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher des tickets..."
+              placeholder="Rechercher..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-64"
+              className="pl-10 w-48"
             />
           </div>
           <select
@@ -186,6 +199,34 @@ export default function TicketsPage() {
               </option>
             ))}
           </select>
+          <select
+            value={priorityFilter}
+            onChange={(e) => setPriorityFilter(e.target.value)}
+            className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-background text-foreground"
+          >
+            <option value="all">Toutes les priorités</option>
+            {TICKET_PRIORITY.map((priority) => (
+              <option key={priority.value} value={priority.value}>
+                {priority.label}
+              </option>
+            ))}
+          </select>
+           <div className="flex items-center space-x-2">
+             <Input 
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-auto"
+              />
+              <span className="text-muted-foreground">-</span>
+              <Input 
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-auto"
+                min={startDate}
+              />
+          </div>
         </div>
         
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>

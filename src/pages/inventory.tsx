@@ -32,6 +32,9 @@ export default function InventoryPage() {
   const [editingInventory, setEditingInventory] = useState<Inventory | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [conditionFilter, setConditionFilter] = useState<string>("all");
+  const [assignedToFilter, setAssignedToFilter] = useState<string>("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -78,8 +81,17 @@ export default function InventoryPage() {
       employee?.name.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCondition = conditionFilter === "all" || item.condition === conditionFilter;
+    const matchesAssignedTo = assignedToFilter === "all" || item.assignedTo === assignedToFilter;
+
+    const dateMatch = (() => {
+      if (!startDate && !endDate) return true;
+      const itemDate = new Date(item.lastChecked!).toISOString().split('T')[0];
+      if (startDate && itemDate < startDate) return false;
+      if (endDate && itemDate > endDate) return false;
+      return true;
+    })();
     
-    return matchesSearch && matchesCondition;
+    return matchesSearch && matchesCondition && matchesAssignedTo && dateMatch;
   }) || [];
 
   const getConditionBadge = (condition: string) => {
@@ -135,14 +147,14 @@ export default function InventoryPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 flex-wrap gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher dans l'inventaire..."
+              placeholder="Rechercher..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-64"
+              className="pl-10 w-48"
             />
           </div>
           <select
@@ -157,6 +169,36 @@ export default function InventoryPage() {
               </option>
             ))}
           </select>
+          <select
+            value={assignedToFilter}
+            onChange={(e) => setAssignedToFilter(e.target.value)}
+            className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-background text-foreground"
+          >
+            <option value="all">Tous les employés</option>
+            {employees?.map((employee) => (
+              <option key={employee.id} value={employee.id}>
+                {employee.name}
+              </option>
+            ))}
+          </select>
+           <div className="flex items-center space-x-2">
+             <Input 
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-auto"
+                placeholder="Date de début"
+              />
+              <span className="text-muted-foreground">-</span>
+              <Input 
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-auto"
+                min={startDate}
+                placeholder="Date de fin"
+              />
+          </div>
         </div>
         
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>

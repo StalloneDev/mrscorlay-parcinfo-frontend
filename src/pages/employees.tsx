@@ -25,12 +25,21 @@ import { apiRequest } from "@/lib/queryClient";
 import EmployeeForm from "@/components/forms/employee-form";
 import { Employee, Equipment } from '@shared/schema';
 import { useRole } from "@/hooks/useRole";
-import { Plus, Search, Edit, Trash2, User } from "lucide-react";
+import { Plus, Search, Edit, Trash2, User, Eye } from "lucide-react";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 
 export default function EmployeesPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [viewingEmployee, setViewingEmployee] = useState<Employee | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { canPerformAction } = useRole();
@@ -42,6 +51,8 @@ export default function EmployeesPage() {
   const { data: equipment } = useQuery<Equipment[]>({
     queryKey: ["/api/equipment"],
   });
+
+  const departments = [...new Set(employees?.map(e => e.department).filter(Boolean) || [])];
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -63,12 +74,16 @@ export default function EmployeesPage() {
     },
   });
 
-  const filteredEmployees = employees?.filter((employee) =>
-    employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.position.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredEmployees = employees?.filter((employee) => {
+      const searchMatch = employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee.position.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const departmentMatch = selectedDepartment ? employee.department === selectedDepartment : true;
+
+      return searchMatch && departmentMatch;
+    }) || [];
 
   const getAssignedEquipmentCount = (employeeId: string) => {
     return equipment?.filter(item => item.assignedTo === employeeId).length || 0;
@@ -97,6 +112,19 @@ export default function EmployeesPage() {
               className="pl-10 w-64"
             />
           </div>
+          <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Filtrer par département" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Tous les départements</SelectItem>
+              {departments.map((dep) => (
+                <SelectItem key={dep} value={dep}>
+                  {dep}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         
         {canPerformAction("create") && (
@@ -226,6 +254,15 @@ export default function EmployeesPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
+                        {canPerformAction("read") && (
+                           <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setViewingEmployee(employee)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        )}
                         {canPerformAction("update") && (
                           <Button
                             variant="ghost"
@@ -272,6 +309,38 @@ export default function EmployeesPage() {
                 queryClient.invalidateQueries({ queryKey: ["/api/employees"] });
               }}
             />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* View Equipment Dialog */}
+      <Dialog open={!!viewingEmployee} onOpenChange={(open) => !open && setViewingEmployee(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Équipements assignés à {viewingEmployee?.name}</DialogTitle>
+          </DialogHeader>
+          {viewingEmployee && (
+            <div>
+              {(() => {
+                const assignedEquipment = equipment?.filter(item => item.assignedTo === viewingEmployee.id) || [];
+                if (assignedEquipment.length === 0) {
+                  return <p className="text-muted-foreground py-4">Aucun équipement assigné à cet employé.</p>
+                }
+                return (
+                  <ul className="space-y-2 max-h-80 overflow-y-auto mt-4">
+                    {assignedEquipment.map(item => (
+                      <li key={item.id} className="p-2 border rounded-md flex justify-between items-center">
+                        <div>
+                          <p className="font-semibold">{item.model}</p>
+                          <p className="text-sm text-muted-foreground">{item.type}</p>
+                        </div>
+                        <Badge variant={item.status === 'en service' ? 'default' : 'destructive'}>{item.status}</Badge>
+                      </li>
+                    ))}
+                  </ul>
+                );
+              })()}
+            </div>
           )}
         </DialogContent>
       </Dialog>
