@@ -39,7 +39,7 @@ export default function EmployeesPage() {
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [viewingEmployee, setViewingEmployee] = useState<Employee | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("all");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { canPerformAction } = useRole();
@@ -80,7 +80,7 @@ export default function EmployeesPage() {
         employee.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
         employee.position.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const departmentMatch = selectedDepartment ? employee.department === selectedDepartment : true;
+      const departmentMatch = selectedDepartment === "all" ? true : employee.department === selectedDepartment;
 
       return searchMatch && departmentMatch;
     }) || [];
@@ -117,7 +117,7 @@ export default function EmployeesPage() {
               <SelectValue placeholder="Filtrer par département" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tous les départements</SelectItem>
+              <SelectItem value="all">Tous les départements</SelectItem>
               {departments.map((dep) => (
                 <SelectItem key={dep} value={dep}>
                   {dep}

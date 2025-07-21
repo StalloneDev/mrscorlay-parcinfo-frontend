@@ -39,8 +39,8 @@ export default function EquipmentPage() {
   const [editingEquipment, setEditingEquipment] = useState<Equipment | null>(null);
   const [viewingHistory, setViewingHistory] = useState<Equipment | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("");
-  const [selectedType, setSelectedType] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedType, setSelectedType] = useState("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const { toast } = useToast();
@@ -87,8 +87,8 @@ export default function EquipmentPage() {
       item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.type.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const statusMatch = selectedStatus ? item.status === selectedStatus : true;
-    const typeMatch = selectedType ? item.type === selectedType : true;
+    const statusMatch = selectedStatus === "all" ? true : item.status === selectedStatus;
+    const typeMatch = selectedType === "all" ? true : item.type === selectedType;
 
     const dateMatch = (() => {
       if (!startDate && !endDate) return true;
@@ -152,7 +152,7 @@ export default function EquipmentPage() {
               <SelectValue placeholder="Statut" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tous les statuts</SelectItem>
+              <SelectItem value="all">Tous les statuts</SelectItem>
               {EQUIPMENT_STATUS.map(status => (
                 <SelectItem key={status.value} value={status.value}>{status.label}</SelectItem>
               ))}
@@ -163,7 +163,7 @@ export default function EquipmentPage() {
               <SelectValue placeholder="Type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tous les types</SelectItem>
+              <SelectItem value="all">Tous les types</SelectItem>
               {types.map(type => (
                 <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
               ))}
