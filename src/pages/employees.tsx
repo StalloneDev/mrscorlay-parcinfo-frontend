@@ -52,7 +52,7 @@ export default function EmployeesPage() {
     queryKey: ["/api/equipment"],
   });
 
-  const departments = [...new Set(employees?.map(e => e.department).filter(d => d) || [])];
+  const departments = [...new Set(employees?.map(e => e.department).filter(d => d && d.trim() !== '') || [])];
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {

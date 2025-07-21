@@ -59,7 +59,7 @@ export default function EquipmentPage() {
     enabled: !!viewingHistory,
   });
 
-  const types = [...new Set(equipment?.map(item => item.type).filter(t => t) || [])];
+  const types = [...new Set(equipment?.map(item => item.type).filter(t => t && t.trim() !== '') || [])];
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
