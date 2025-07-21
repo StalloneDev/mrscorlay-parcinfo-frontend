@@ -42,7 +42,7 @@ export default function EmployeesPage() {
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { canPerformAction } = useRole();
+  const { canPerformAction, isAdmin, isTechnician } = useRole();
 
   const { data: employees, isLoading } = useQuery<Employee[]>({
     queryKey: ["/api/employees"],
@@ -254,34 +254,41 @@ export default function EmployeesPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
-                        {canPerformAction("read") && (
-                           <Button
+                        {/* Affichage conditionnel des boutons d'action selon le rôle */}
+                        {((isAdmin() || isTechnician()) ? (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setViewingEmployee(employee)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setEditingEmployee(employee)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => deleteMutation.mutate(employee.id)}
+                              disabled={deleteMutation.isPending}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => setViewingEmployee(employee)}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                        )}
-                        {canPerformAction("update") && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setEditingEmployee(employee)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {canPerformAction("delete") && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => deleteMutation.mutate(employee.id)}
-                            disabled={deleteMutation.isPending}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
+                        ))}
                       </div>
                     </TableCell>
                   </TableRow>
